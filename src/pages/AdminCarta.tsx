@@ -179,9 +179,9 @@ function Admin() {
     setBusy('pdf');
     try {
       const { downloadCartaPdf } = await import('../pdf/download');
-      await downloadCartaPdf(categories, products);
+      await downloadCartaPdf(categories, products, updated);
     } catch (e) {
-      setToast(e instanceof Error && e.message === 'PDF_PENDIENTE' ? 'El PDF llega en la próxima entrega' : 'No se pudo generar el PDF');
+      setToast('No se pudo generar el PDF');
       console.error(e);
     } finally {
       setBusy(null);
@@ -199,10 +199,10 @@ function Admin() {
   return (
     <div className={s.page}>
       <AdminBar>
-        <Button onClick={() => setAjuste({ open: true, cat: null })} color="tinta.0" c="bordo.7" size="sm">
+        <Button onClick={() => setAjuste({ open: true, cat: null })} disabled={loading || !products.length} color="tinta.0" c="bordo.7" size="sm">
           Ajustar precios
         </Button>
-        <Button onClick={downloadPdf} loading={busy === 'pdf'} variant="outline" color="tinta.0" size="sm">
+        <Button onClick={downloadPdf} loading={busy === 'pdf'} disabled={loading || !products.length} variant="outline" color="tinta.0" size="sm">
           Descargar carta PDF
         </Button>
         <Button component="a" href="/carta" target="_blank" variant="subtle" color="tinta.0" size="sm">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '../brand/Logo';
+import { Direccion } from '../components/Direccion';
 import { MenuRow, SinTacc } from '../components/MenuRow';
 import { useMenu } from '../hooks/useMenu';
 import { usePriceUpdated } from '../hooks/usePriceUpdated';
@@ -27,9 +28,10 @@ export default function Carta() {
   const onNavScroll = () => {
     const el = navRef.current;
     if (!el) return;
-    setEdges({ start: el.scrollLeft > 4, end: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
+    const start = el.scrollLeft > 4;
+    const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
+    setEdges((e) => (e.start === start && e.end === end ? e : { start, end }));
   };
-  useEffect(onNavScroll);
   const [, tick] = useState(0);
 
   useEffect(() => {
@@ -59,6 +61,13 @@ export default function Carta() {
       })
       .filter((x) => x.items.length > 0);
   }, [categories, products, q, hideSoldOut]);
+
+  useEffect(() => {
+    onNavScroll();
+    window.addEventListener('resize', onNavScroll);
+    return () => window.removeEventListener('resize', onNavScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories.length]);
 
   // scroll-spy
   useEffect(() => {
@@ -197,7 +206,7 @@ export default function Carta() {
               <h3>Dónde</h3>
               <p>
                 <a href={site.maps} target="_blank" rel="noreferrer">
-                  {site.direccion}
+                  <Direccion />
                 </a>
                 <br />
                 {site.ciudad}

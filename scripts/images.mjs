@@ -12,7 +12,8 @@ const PHOTOS = {
   'patio-faroles': { file: 'igexport-DR2_7sIEcAc.jpg' },
   'jardin-noche': { file: 'igexport-DVtTlhRjjZ_.jpg' },
   'sendero-noche': { file: 'igexport-DVtTlhRjjZ_-2.jpg' },
-  galeria: { file: 'igexport-DVtTlhRjjZ_-3.jpg' },
+  // a la izquierda hay un cartel de salida: se recorta el borde
+  galeria: { file: 'igexport-DVtTlhRjjZ_-3.jpg', crop: { left: 170, top: 0, width: 1270, height: 1693 } },
   // abajo a la izquierda hay un objeto blanco desenfocado: se recorta el pie
   ficus: { file: 'igexport-DWUAXwSDi8u-3.jpg', crop: { left: 0, top: 0, width: 1440, height: 1760 } },
 };

@@ -1,0 +1,23 @@
+.page { min-height: 100dvh; background: var(--crema-oscuro); padding: 0 16px 40px; }
+.tools { max-width: 210mm; margin: 0 auto; display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 16px 0; color: var(--tinta); font-size: 0.9rem; flex-wrap: wrap; }
+.tools b { font-weight: 700; word-break: break-all; }
+.tools button { appearance: none; border: 0; background: var(--bordo); color: var(--crema); font: inherit; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; min-height: 44px; padding: 0 22px; border-radius: 2px; cursor: pointer; }
+.sheet {
+  width: min(210mm, 100%); aspect-ratio: 210 / 297; margin: 0 auto; background: var(--crema); color: var(--bordo);
+  display: flex; flex-direction: column; align-items: center; padding: 14mm 16mm 12mm; box-sizing: border-box; text-align: center;
+}
+.sheet h1 { font-size: clamp(2.6rem, 9vw, 4.6rem); margin-top: 9mm; display: flex; flex-direction: column; align-items: center; }
+.filete { display: block; width: 46mm; height: 3px; background: var(--bordo); margin-top: 5mm; }
+.lead { margin: 6mm 0 0; font-size: clamp(1rem, 2.6vw, 1.3rem); color: var(--tinta); font-weight: 300; }
+.qr { width: 58%; margin-top: 9mm; }
+.qr svg { width: 100%; height: auto; display: block; }
+.url { margin: 6mm 0 0; font-weight: 700; letter-spacing: 0.04em; font-size: clamp(0.85rem, 2vw, 1.05rem); }
+.foot { margin-top: auto; width: 100%; display: flex; justify-content: space-between; align-items: baseline; border-top: 1.5px solid var(--bordo); padding-top: 4mm; font-weight: 700; font-size: 0.95rem; }
+.lema { font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; font-size: 1.2rem; }
+
+@media print {
+  @page { size: A4; margin: 0; }
+  .page { background: none; padding: 0; }
+  .tools { display: none; }
+  .sheet { width: 210mm; height: 297mm; aspect-ratio: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
