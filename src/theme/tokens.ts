@@ -15,6 +15,7 @@ export const color = {
   tinta: '#3A2422',
   tintaSuave: '#6A5450', // texto secundario (AA sobre crema: 5.6:1)
   terracota: '#B5492F',
+  terracotaTexto: '#9E3D27',
   verde: '#3E5B3A',
   ambar: '#B7791F',
   rojo: '#A8321F',
@@ -56,3 +57,7 @@ export const site = {
     { dias: 'Viernes y sábado', horas: '12 a 00' },
   ],
 } as const;
+
+/** Fecha de la carta impresa (metadato del PDF original). Se muestra como
+ *  "Precios actualizados al" mientras no haya cambios registrados en price_changes. */
+export const CARTA_IMPRESA_FECHA = '2026-09-08T12:00:00-03:00';

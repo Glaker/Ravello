@@ -30,6 +30,9 @@ export interface Order {
   table_label: string;
   status: OrderStatus;
   created_at: string;
+  preparing_at?: string | null;
+  ready_at?: string | null;
+  delivered_at?: string | null;
 }
 
 export interface OrderItem {
@@ -40,4 +43,12 @@ export interface OrderItem {
   price_snapshot: number;
   qty: number;
   note: string | null;
+}
+
+export interface PriceChange {
+  id: number;
+  product_id: number;
+  old: number;
+  new: number;
+  created_at: string;
 }

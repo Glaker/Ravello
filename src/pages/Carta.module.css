@@ -5,9 +5,15 @@
 .header a { display: inline-block; text-decoration: none; }
 .lema { margin: 14px 0 0; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--tinta-suave); }
 
+.updated { margin: 6px 0 0; font-size: 0.85rem; font-style: italic; color: var(--tinta-suave); }
+
 .sticky { position: sticky; top: 0; z-index: 10; background: var(--crema); border-bottom: 1px solid var(--linea); }
-.nav { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; padding: 0 20px; max-width: 720px; margin: 0 auto; scroll-snap-type: x proximity; }
+.nav { position: relative; display: flex; gap: 22px; overflow-x: auto; touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; padding: 0 20px; max-width: 720px; margin: 0 auto; scroll-snap-type: x proximity; scroll-padding-inline: 20px; }
 .nav::-webkit-scrollbar { display: none; }
+.sticky::before, .sticky::after { content: ''; position: absolute; top: 0; bottom: 1px; width: 56px; pointer-events: none; z-index: 1; transition: opacity 160ms; opacity: 0; }
+.sticky::before { left: 0; background: linear-gradient(to right, var(--crema) 15%, rgba(237,229,213,0)); }
+.sticky::after { right: 0; background: linear-gradient(to left, var(--crema) 15%, rgba(237,229,213,0)); }
+.sticky[data-fade-start='true']::before, .sticky[data-fade-end='true']::after { opacity: 1; }
 .navItem {
   flex: none; appearance: none; background: none; border: 0; cursor: pointer;
   font: inherit; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
@@ -37,7 +43,7 @@
 .variants li { padding-left: 14px; text-indent: -14px; }
 .variants b { font-weight: 500; color: var(--bordo); font-style: normal; }
 .variants i { font-weight: 300; }
-.soldout { font-size: 0.7rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: var(--terracota); margin-left: 6px; text-decoration: none; display: inline-block; }
+.soldout { font-size: 0.7rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: var(--terracota-texto); margin-left: 6px; text-decoration: none; display: inline-block; }
 .badgeInline { margin-left: 8px; position: relative; top: -2px; }
 
 .empty { text-align: center; padding: 48px 0; color: var(--tinta-suave); }

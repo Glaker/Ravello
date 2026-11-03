@@ -14,6 +14,7 @@
   --tinta: #3A2422;
   --tinta-suave: #6A5450;
   --terracota: #B5492F;
+  --terracota-texto: #9E3D27; /* terracota para texto chico: AA sobre crema, crema oscuro y papel */
   --verde: #3E5B3A;
   --ambar: #B7791F;
   --rojo: #A8321F;
@@ -82,3 +83,5 @@ img { display: block; max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+input[type='search']::-webkit-search-cancel-button, input[type='search']::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }

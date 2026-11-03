@@ -17,3 +17,13 @@ export function hora(iso: string): string {
 export function minutosDesde(iso: string, now = Date.now()): number {
   return Math.max(0, Math.floor((now - new Date(iso).getTime()) / 60000));
 }
+
+/** "08/09" */
+export function diaMes(iso: string): string {
+  return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+}
+
+/** Redondeo al múltiplo más cercano (50, 100, 500…) */
+export function redondear(n: number, paso: number): number {
+  return Math.max(0, Math.round(n / paso) * paso);
+}

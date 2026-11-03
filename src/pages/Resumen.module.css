@@ -1,0 +1,32 @@
+.page { min-height: 100dvh; background: var(--crema); color: var(--tinta); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; }
+.head h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); margin-top: 6px; }
+.head p { margin: 0; }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px 48px; margin-top: 40px; padding-bottom: 32px; border-bottom: 2px solid var(--bordo); align-items: end; }
+.big { display: flex; flex-direction: column; gap: 6px; }
+.label, .facts dt { font-size: 0.75rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tinta-suave); }
+.money { font-weight: 900; font-size: clamp(3rem, 9vw, 6.2rem); line-height: 0.9; color: var(--bordo); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.sub { font-size: 1.05rem; font-weight: 500; }
+.facts { margin: 0; display: grid; gap: 22px; }
+.facts dd { margin: 4px 0 0; font-weight: 900; font-size: 2.2rem; color: var(--bordo); line-height: 1; font-variant-numeric: tabular-nums; }
+.facts small { font-size: 1rem; font-weight: 700; }
+.note { display: block; font-size: 0.85rem; color: var(--tinta-suave); font-style: italic; margin-top: 4px; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 48px; margin-top: 36px; }
+.h2 { margin: 0 0 16px; font-size: 1.3rem; font-weight: 900; text-transform: uppercase; color: var(--bordo); }
+.top { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 1.1rem; color: var(--bordo); }
+.top li { display: flex; align-items: flex-end; gap: 14px; }
+.rank { font-weight: 900; font-size: 1.6rem; width: 1.1em; line-height: 1; color: var(--terracota-texto); }
+.qty { font-weight: 700; color: var(--tinta); }
+.empty { color: var(--tinta-suave); font-style: italic; }
+
+.chart { margin: 0; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.axis { font-size: 15px; fill: var(--tinta-suave); font-family: inherit; }
+.val { font-size: 14px; font-weight: 900; fill: var(--tinta); font-family: inherit; }
+.caption { margin-top: 8px; font-size: 0.85rem; color: var(--tinta-suave); font-style: italic; min-height: 1.3em; }
+
+@media (max-width: 760px) {
+  .hero, .grid { grid-template-columns: 1fr; }
+}

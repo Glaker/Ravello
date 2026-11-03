@@ -38,12 +38,12 @@
 .items { list-style: none; margin: 0; padding: 10px 14px 6px; display: flex; flex-direction: column; gap: 8px; }
 .items li { display: grid; grid-template-columns: 2.4em 1fr; gap: 0 6px; font-size: 1.2rem; line-height: 1.2; font-weight: 600; }
 .items li b { font-weight: 900; color: var(--bordo); font-variant-numeric: tabular-nums; }
-.note { grid-column: 2; font-style: italic; font-weight: 500; color: var(--terracota); font-size: 1.05rem; margin-top: 2px; }
+.note { grid-column: 2; font-style: italic; font-weight: 500; color: var(--terracota-texto); font-size: 1.05rem; margin-top: 2px; }
 .station { grid-column: 2; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tinta-suave); }
 .other { padding: 0 14px 8px 14px; font-size: 0.85rem; color: var(--tinta-suave); font-weight: 600; }
 .tFoot { padding: 10px 14px 12px; font-size: 0.8rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bordo); display: flex; justify-content: space-between; }
 
-.empty { padding: 20px 6px; opacity: 0.55; font-weight: 500; }
+.empty { margin-top: 4px; padding: 22px 14px; border: 1.5px dashed rgba(237,229,213,0.32); color: rgba(237,229,213,0.78); font-weight: 600; font-size: 1.05rem; text-align: center; }
 
 .gate { position: fixed; inset: 0; z-index: 50; background: var(--bordo-profundo); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; text-align: center; }
 .gate p { margin: 0; max-width: 36ch; opacity: 0.85; font-size: 1.05rem; font-weight: 400; }

@@ -1,11 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button, Group, Modal, Switch, Text, TextInput } from '@mantine/core';
-import { Isotipo } from '../brand/Logo';
+import { AdminBar } from '../components/AdminBar';
+import { AjustePrecios } from '../components/AjustePrecios';
+import { usePriceUpdated } from '../hooks/usePriceUpdated';
 import { PinGate } from '../components/PinGate';
 import { useMenu } from '../hooks/useMenu';
-import { precio } from '../lib/format';
+import { diaMes, hora, precio } from '../lib/format';
 import { supabase } from '../lib/supabase';
-import type { Category, Product } from '../lib/types';
+import type { Category, PriceChange, Product } from '../lib/types';
 import s from './AdminCarta.module.css';
 
 type Patch = Partial<Pick<Product, 'name' | 'description' | 'price' | 'available' | 'sin_tacc'>>;
@@ -86,7 +88,7 @@ function ProductRow({ p, onSave }: { p: Product; onSave: (id: number, patch: Pat
         onChange={(e) => onSave(p.id, { available: e.currentTarget.checked })}
         label={p.available ? 'Hay' : 'No hay'}
         size="md"
-        styles={{ label: { fontWeight: 700, color: p.available ? 'var(--verde)' : 'var(--terracota)', paddingLeft: 8 } }}
+        styles={{ label: { fontWeight: 700, color: p.available ? 'var(--verde)' : 'var(--terracota-texto)', paddingLeft: 8 } }}
         aria-label="Disponible"
       />
     </div>
@@ -139,6 +141,15 @@ function Admin() {
   const [toast, setToast] = useState<string | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
   const [busy, setBusy] = useState<'pdf' | 'reset' | null>(null);
+  const [ajuste, setAjuste] = useState<{ open: boolean; cat: number | null }>({ open: false, cat: null });
+  const [historial, setHistorial] = useState<PriceChange[] | null>(null);
+  const updated = usePriceUpdated();
+
+  const openHistorial = async () => {
+    const { data } = await supabase.from('price_changes').select('*').order('created_at', { ascending: false }).limit(60);
+    setHistorial((data as PriceChange[]) ?? []);
+  };
+  const productName = (id: number) => products.find((p) => p.id === id)?.name ?? '—';
 
   useEffect(() => {
     document.title = 'Admin · Ravello Jardín';
@@ -187,23 +198,20 @@ function Admin() {
 
   return (
     <div className={s.page}>
-      <div className={s.bar}>
-        <div className={s.barIn}>
-          <div className={s.barTitle}>
-            <Isotipo width={44} />
-            Carta <small>admin</small>
-          </div>
-          <Button component="a" href="/carta" target="_blank" variant="outline" color="tinta.0" size="sm">
-            Ver carta
-          </Button>
-          <Button onClick={downloadPdf} loading={busy === 'pdf'} color="tinta.0" c="bordo.7" size="sm">
-            Descargar carta PDF
-          </Button>
-          <Button variant="subtle" color="tinta.0" size="sm" onClick={() => setResetOpen(true)}>
-            Resetear demo
-          </Button>
-        </div>
-      </div>
+      <AdminBar>
+        <Button onClick={() => setAjuste({ open: true, cat: null })} color="tinta.0" c="bordo.7" size="sm">
+          Ajustar precios
+        </Button>
+        <Button onClick={downloadPdf} loading={busy === 'pdf'} variant="outline" color="tinta.0" size="sm">
+          Descargar carta PDF
+        </Button>
+        <Button component="a" href="/carta" target="_blank" variant="subtle" color="tinta.0" size="sm">
+          Ver carta
+        </Button>
+        <Button variant="subtle" color="tinta.0" size="sm" onClick={() => setResetOpen(true)}>
+          Resetear demo
+        </Button>
+      </AdminBar>
 
       <main className={s.main}>
         <div className={s.intro}>
@@ -211,11 +219,17 @@ function Admin() {
             La carta, en vivo
             <span className="r-filete" />
           </h1>
-          <p>Cambiá un precio y apretá Enter: se actualiza al instante en el celu de quien esté mirando la carta. El PDF sale siempre con los precios de acá.</p>
+          <div className={s.introSide}>
+            <p>Cambiá un precio y apretá Enter: se actualiza al instante en el celu de quien esté mirando la carta. El PDF sale siempre con los precios de acá.</p>
+            <p className={s.updated}>
+              Precios actualizados al <b>{diaMes(updated)}</b> ·{' '}
+              <button type="button" onClick={openHistorial}>ver historial</button>
+            </p>
+          </div>
         </div>
 
         {loading && <p>Cargando…</p>}
-        {error && <p style={{ color: 'var(--terracota)' }}>Error: {error}</p>}
+        {error && <p style={{ color: 'var(--terracota-texto)' }}>Error: {error}</p>}
 
         {categories.map((cat) => {
           const items = products.filter((p) => p.category_id === cat.id);
@@ -223,7 +237,12 @@ function Admin() {
             <section key={cat.id} className={s.cat}>
               <div className={s.catHead}>
                 <h2 className="r-title">{cat.name}</h2>
-                <span className={s.station}>{cat.station === 'barra' ? 'Sale por barra' : 'Sale por cocina'} · {items.length}</span>
+                <span className={s.station}>
+                  {cat.station === 'barra' ? 'Sale por barra' : 'Sale por cocina'} · {items.length}
+                  <button type="button" className={s.catAdjust} onClick={() => setAjuste({ open: true, cat: cat.id })}>
+                    Ajustar %
+                  </button>
+                </span>
               </div>
               <div className={s.row} style={{ borderBottom: 0, paddingBottom: 0 }}>
                 <span className={s.colHead}>Producto</span>
@@ -246,6 +265,29 @@ function Admin() {
           <Button variant="subtle" onClick={() => setResetOpen(false)}>Cancelar</Button>
           <Button color="terracota" onClick={reset} loading={busy === 'reset'}>Borrar comandas</Button>
         </Group>
+      </Modal>
+
+      <AjustePrecios
+        opened={ajuste.open}
+        initialCategory={ajuste.cat}
+        onClose={() => setAjuste((a) => ({ ...a, open: false }))}
+        categories={categories}
+        products={products}
+        onDone={setToast}
+      />
+
+      <Modal opened={historial !== null} onClose={() => setHistorial(null)} size="lg" centered title={<span className="r-title" style={{ fontSize: 22 }}>Historial de precios</span>}>
+        {historial?.length === 0 && <Text>Todavía no hubo cambios desde la carta impresa.</Text>}
+        <div className={s.hist}>
+          {historial?.map((h) => (
+            <div key={h.id} className={s.histRow}>
+              <span className={s.histDate}>{diaMes(h.created_at)} {hora(h.created_at)}</span>
+              <span>{productName(h.product_id)}</span>
+              <span className={s.histOld}>{precio(h.old)}</span>
+              <span className={s.histNew}>{precio(h.new)}</span>
+            </div>
+          ))}
+        </div>
       </Modal>
 
       {toast && <div className={s.toast} role="status">{toast}</div>}

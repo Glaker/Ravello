@@ -57,13 +57,14 @@ export const ravello = [R(-272), A(-196), V(-106), E(-16), L(54), L(122), O(190)
 export const ravelloStroke = 4.6;
 
 // "jardín" minúscula geométrica, chica y centrada
+// (el hueco después de la "r" se compensa: la "r" es abierta, d-í-n van 7 unidades más cerca)
 export const jardin = [
-  'M -79 214 V 249 Q -79 257 -87 257', // j
-  'M -39 214 V 240 M -39 227 A 13 13 0 1 0 -65 227 A 13 13 0 1 0 -39 227', // a
-  'M -25 240 V 214 M -25 223 Q -22 214 -11 214', // r
-  'M 29 200 V 240 M 29 227 A 13 13 0 1 0 3 227 A 13 13 0 1 0 29 227', // d
-  'M 43 214 V 240 M 41 207 L 48 199', // í
-  'M 57 240 V 214 M 57 226 Q 57 214 68 214 Q 79 214 79 226 V 240', // n
+  'M -75.5 214 V 249 Q -75.5 257 -83.5 257', // j
+  'M -35.5 214 V 240 M -35.5 227 A 13 13 0 1 0 -61.5 227 A 13 13 0 1 0 -35.5 227', // a
+  'M -21.5 240 V 214 M -21.5 223 Q -18.5 214 -7.5 214', // r
+  'M 25.5 200 V 240 M 25.5 227 A 13 13 0 1 0 -0.5 227 A 13 13 0 1 0 25.5 227', // d
+  'M 39.5 214 V 240 M 37.5 207 L 44.5 199', // í
+  'M 53.5 240 V 214 M 53.5 226 Q 53.5 214 64.5 214 Q 75.5 214 75.5 226 V 240', // n
 ].join(' ');
-export const jardinDot = { cx: -79, cy: 204, r: 2.6 };
+export const jardinDot = { cx: -75.5, cy: 204, r: 2.6 };
 export const jardinStroke = 3.2;

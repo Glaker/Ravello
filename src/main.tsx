@@ -12,6 +12,7 @@ const Carta = lazy(() => import('./pages/Carta'));
 const AdminCarta = lazy(() => import('./pages/AdminCarta'));
 const Mozo = lazy(() => import('./pages/Mozo'));
 const Cocina = lazy(() => import('./pages/Cocina'));
+const Resumen = lazy(() => import('./pages/Resumen'));
 
 function MissingEnv() {
   return (
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/carta" element={<Carta />} />
               <Route path="/admin/carta" element={<AdminCarta />} />
               <Route path="/admin" element={<AdminCarta />} />
+              <Route path="/admin/resumen" element={<Resumen />} />
               <Route path="/mozo" element={<Mozo />} />
               <Route path="/cocina" element={<Cocina />} />
               <Route path="*" element={<Landing />} />

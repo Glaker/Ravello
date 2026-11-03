@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal } from '@mantine/core';
 import { Isotipo } from '../brand/Logo';
 import { useMenu } from '../hooks/useMenu';
-import { precio } from '../lib/format';
+import { SinTacc } from '../components/MenuRow';
+import { minutosDesde, normalizar, precio } from '../lib/format';
 import { supabase } from '../lib/supabase';
-import type { Product } from '../lib/types';
+import type { Order, Product } from '../lib/types';
 import s from './Mozo.module.css';
 
 const MESAS = Array.from({ length: 12 }, (_, i) => `Mesa ${i + 1}`);
 const QUICK_NOTES = ['sin TACC', 'sin cebolla', 'sin hielo', 'para compartir'];
+/** Si todavía no hay ventas, se muestran estos (por nombre). */
+const DEFAULT_TOP = ['Café con leche', 'Capuchino', 'Medialuna dulce', 'Desayuno Ravello', 'Limonada', 'Wraps'];
+type OpenOrder = Pick<Order, 'id' | 'table_label' | 'status' | 'created_at' | 'ready_at'>;
 
 interface Line {
   key: string;
@@ -28,7 +32,6 @@ export default function Mozo() {
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [sent, setSent] = useState<string | null>(null);
-  const [openTables, setOpenTables] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     document.title = 'Mozo · Ravello Jardín';
@@ -37,23 +40,86 @@ export default function Mozo() {
     if (catId === null && categories.length) setCatId(categories[0].id);
   }, [categories, catId]);
 
-  // mesas con comandas abiertas (para marcarlas en la grilla)
+  // comandas abiertas: para marcar mesas y avisar cuando cocina las pone "lista"
+  const [open, setOpen] = useState<OpenOrder[]>([]);
+  const [alerts, setAlerts] = useState<OpenOrder[]>([]);
+  const prevStatus = useRef<Map<number, string>>(new Map());
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from('orders').select('table_label').in('status', ['new', 'preparing', 'ready']);
-      setOpenTables(new Set((data ?? []).map((o) => o.table_label as string)));
+      const { data } = await supabase.from('orders').select('id, table_label, status, created_at, ready_at').in('status', ['new', 'preparing', 'ready']).order('created_at');
+      const rows = (data ?? []) as OpenOrder[];
+      rows.forEach((o) => prevStatus.current.set(o.id, o.status));
+      setOpen(rows);
     };
     load();
     const ch = supabase
       .channel('mozo-orders')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, load)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (p) => {
+        if (p.eventType === 'DELETE') {
+          const id = (p.old as Partial<Order>).id;
+          setOpen((os) => os.filter((o) => o.id !== id));
+          setAlerts((as) => as.filter((o) => o.id !== id));
+          return;
+        }
+        const row = p.new as OpenOrder;
+        const before = prevStatus.current.get(row.id);
+        prevStatus.current.set(row.id, row.status);
+        setOpen((os) => {
+          const rest = os.filter((o) => o.id !== row.id);
+          return row.status === 'delivered' ? rest : [...rest, row].sort((a, b) => a.created_at.localeCompare(b.created_at));
+        });
+        if (row.status === 'ready' && before !== 'ready') {
+          setAlerts((as) => [...as.filter((o) => o.id !== row.id), row]);
+          try {
+            navigator.vibrate?.([180, 90, 180]);
+          } catch {
+            /* sin vibración */
+          }
+        }
+        if (row.status === 'delivered') setAlerts((as) => as.filter((o) => o.id !== row.id));
+      })
       .subscribe();
+    const onVis = () => document.visibilityState === 'visible' && load();
+    document.addEventListener('visibilitychange', onVis);
     return () => {
+      document.removeEventListener('visibilitychange', onVis);
       supabase.removeChannel(ch);
     };
   }, []);
 
-  const visible = useMemo(() => products.filter((p) => p.category_id === catId), [products, catId]);
+  const deliver = async (id: number) => {
+    setAlerts((as) => as.filter((o) => o.id !== id));
+    setOpen((os) => os.filter((o) => o.id !== id));
+    await supabase.from('orders').update({ status: 'delivered' }).eq('id', id);
+  };
+  const tableState = (label: string) => {
+    const mine = open.filter((o) => o.table_label === label);
+    if (mine.some((o) => o.status === 'ready')) return 'ready';
+    return mine.length ? 'busy' : null;
+  };
+  const readyOrders = open.filter((o) => o.status === 'ready');
+
+  // más pedidos
+  const [topIds, setTopIds] = useState<number[]>([]);
+  useEffect(() => {
+    supabase.rpc('top_products', { lim: 6 }).then(({ data }) => setTopIds(((data ?? []) as { product_id: number }[]).map((r) => r.product_id)));
+  }, [sent]);
+  const top = useMemo(() => {
+    const byId = topIds.map((id) => products.find((p) => p.id === id)).filter(Boolean) as Product[];
+    const fill = DEFAULT_TOP.map((n) => products.find((p) => p.name === n)).filter((p): p is Product => !!p && !byId.includes(p));
+    return [...byId, ...fill].slice(0, 6);
+  }, [topIds, products]);
+
+  const [q, setQ] = useState('');
+  const visible = useMemo(() => {
+    const nq = normalizar(q.trim());
+    if (!nq) return products.filter((p) => p.category_id === catId);
+    return products.filter((p) => {
+      const cat = categories.find((c) => c.id === p.category_id)?.name ?? '';
+      const hay = normalizar([p.name, cat, p.description ?? '', p.sin_tacc ? 'sin tacc' : '', ...(p.variants ?? []).map((v) => v.name)].join(' '));
+      return nq.split(/\s+/).every((w) => hay.includes(w));
+    });
+  }, [products, categories, catId, q]);
   const total = lines.reduce((acc, l) => acc + l.product.price * l.qty, 0);
   const count = lines.reduce((acc, l) => acc + l.qty, 0);
   const countFor = (id: number) => lines.filter((l) => l.product.id === id).reduce((a, l) => a + l.qty, 0);
@@ -93,6 +159,23 @@ export default function Mozo() {
     }, 1600);
   };
 
+  const toasts = alerts.length > 0 && (
+    <div className={s.toasts} role="status" aria-live="assertive">
+      {alerts.map((o) => (
+        <div key={o.id} className={s.toast}>
+          <div>
+            <b>{o.table_label} · lista</b>
+            <span>Comanda #{o.id}, pasala a buscar</span>
+          </div>
+          <button onClick={() => deliver(o.id)}>Entregada</button>
+          <button className={s.toastClose} onClick={() => setAlerts((as) => as.filter((x) => x.id !== o.id))} aria-label="Cerrar aviso">
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+
   if (!mesa) {
     return (
       <div className={s.page}>
@@ -101,6 +184,18 @@ export default function Mozo() {
           <h1>Mozo</h1>
         </div>
         <div className={s.tables}>
+          {readyOrders.length > 0 && (
+            <section className={s.readyBox}>
+              <h2 className={s.readyTitle}>Para llevar a la mesa</h2>
+              {readyOrders.map((o) => (
+                <div key={o.id} className={s.readyRow}>
+                  <b>{o.table_label}</b>
+                  <span>#{o.id} · lista hace {minutosDesde(o.ready_at ?? o.created_at)}′</span>
+                  <button onClick={() => deliver(o.id)}>Entregada</button>
+                </div>
+              ))}
+            </section>
+          )}
           <h2 className="r-title">
             ¿Qué mesa?
             <span className="r-filete" />
@@ -110,15 +205,15 @@ export default function Mozo() {
               <button key={m} className={s.table} onClick={() => setMesa(m)}>
                 <small>Mesa</small>
                 {m.replace('Mesa ', '')}
-                {openTables.has(m) && <span className={s.busy}>EN CURSO</span>}
+                {tableState(m) && <span className={s.busy} data-ready={tableState(m) === 'ready'}>{tableState(m) === 'ready' ? 'LISTA' : 'EN CURSO'}</span>}
               </button>
             ))}
-            <button className={`${s.table} ${s.wide}`} onClick={() => setMesa('Barra')}>
-              Barra
-            </button>
-            <button className={`${s.table} ${s.wide}`} onClick={() => setMesa('Para llevar')}>
-              Para llevar
-            </button>
+            {['Barra', 'Para llevar'].map((m) => (
+              <button key={m} className={`${s.table} ${s.wide}`} onClick={() => setMesa(m)}>
+                {m}
+                {tableState(m) && <span className={s.busy} data-ready={tableState(m) === 'ready'}>{tableState(m) === 'ready' ? 'LISTA' : 'EN CURSO'}</span>}
+              </button>
+            ))}
           </div>
         </div>
         {sent && (
@@ -127,6 +222,7 @@ export default function Mozo() {
             <span>Comanda de {sent} en cocina</span>
           </div>
         )}
+        {toasts}
       </div>
     );
   }
@@ -143,20 +239,52 @@ export default function Mozo() {
 
       <div className={s.body}>
         <div className={s.picker}>
+          {open.some((o) => o.table_label === mesa && o.status === 'ready') && (
+            <div className={s.banner}>
+              <span>Hay una comanda de {mesa} lista en cocina.</span>
+              {open
+                .filter((o) => o.table_label === mesa && o.status === 'ready')
+                .map((o) => (
+                  <button key={o.id} onClick={() => deliver(o.id)}>Entregada #{o.id}</button>
+                ))}
+            </div>
+          )}
+          <label className={s.search}>
+            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar en toda la carta" aria-label="Buscar producto" enterKeyHint="search" />
+            {q && <button type="button" onClick={() => setQ('')}>Borrar</button>}
+          </label>
+          {!q && (
+            <div className={s.topRow}>
+              <span className={s.topLabel}>Más pedidos</span>
+              {top.map((p) => (
+                <button key={p.id} className={s.topBtn} onClick={() => tap(p)} disabled={!p.available}>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          )}
           <div className={s.cats}>
             {categories.map((c) => (
-              <button key={c.id} className={s.cat} data-active={c.id === catId} onClick={() => setCatId(c.id)}>
+              <button key={c.id} className={s.cat} data-active={!q && c.id === catId} onClick={() => { setQ(''); setCatId(c.id); }}>
                 {c.name}
               </button>
             ))}
           </div>
           <div className={s.products}>
+            {q && visible.length === 0 && <p className={s.emptyCart}>Nada con “{q}”.</p>}
             {visible.map((p) => {
               const n = countFor(p.id);
               return (
                 <button key={p.id} className={s.product} onClick={() => tap(p)} disabled={!p.available}>
-                  <span className={s.pName}>{p.name}</span>
-                  <span className={s.pPrice}>{p.available ? precio(p.price) : 'No hay'}</span>
+                  <span className={s.pName}>
+                    {q && <small className={s.pCat}>{categories.find((c) => c.id === p.category_id)?.name}</small>}
+                    {p.name}
+                  </span>
+                  <span className={s.pMeta}>
+                    <span className={s.pPrice}>{precio(p.price)}</span>
+                    {!p.available && <span className={s.noHay}>No hay</span>}
+                    {p.sin_tacc && <SinTacc />}
+                  </span>
                   {n > 0 && <span className={s.pCount}>{n}</span>}
                 </button>
               );
@@ -240,6 +368,7 @@ export default function Mozo() {
           <span>Comanda de {sent} en cocina</span>
         </div>
       )}
+      {toasts}
     </div>
   );
 }

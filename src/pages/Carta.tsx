@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Logo } from '../brand/Logo';
 import { MenuRow, SinTacc } from '../components/MenuRow';
 import { useMenu } from '../hooks/useMenu';
-import { normalizar } from '../lib/format';
+import { usePriceUpdated } from '../hooks/usePriceUpdated';
+import { diaMes, normalizar } from '../lib/format';
 import type { Product } from '../lib/types';
 import { site } from '../theme/tokens';
 import s from './Carta.module.css';
@@ -17,10 +18,18 @@ function slug(name: string) {
 
 export default function Carta() {
   const { categories, products, loading, error, conn, changed } = useMenu();
+  const updated = usePriceUpdated();
   const [q, setQ] = useState('');
   const [hideSoldOut, setHideSoldOut] = useState(false);
   const [active, setActive] = useState<string>('');
   const navRef = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ start: false, end: true });
+  const onNavScroll = () => {
+    const el = navRef.current;
+    if (!el) return;
+    setEdges({ start: el.scrollLeft > 4, end: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
+  };
+  useEffect(onNavScroll);
   const [, tick] = useState(0);
 
   useEffect(() => {
@@ -66,8 +75,9 @@ export default function Carta() {
   }, [sections]);
 
   useEffect(() => {
-    const btn = navRef.current?.querySelector<HTMLElement>(`[data-id="${active}"]`);
-    btn?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    const nav = navRef.current;
+    const btn = nav?.querySelector<HTMLElement>(`[data-id="${active}"]`);
+    if (nav && btn) nav.scrollTo({ left: Math.max(0, btn.offsetLeft - nav.clientWidth / 2 + btn.offsetWidth / 2), behavior: 'smooth' });
   }, [active]);
 
   const now = Date.now();
@@ -81,11 +91,12 @@ export default function Carta() {
             <Logo width={150} />
           </Link>
           <p className={s.lema}>{site.lema}</p>
+          <p className={s.updated}>Precios actualizados al {diaMes(updated)}</p>
         </div>
       </header>
 
-      <div className={s.sticky}>
-        <nav className={s.nav} ref={navRef} aria-label="Categorías">
+      <div className={s.sticky} data-fade-start={edges.start} data-fade-end={edges.end}>
+        <nav className={s.nav} ref={navRef} aria-label="Categorías" onScroll={onNavScroll}>
           {sections.map(({ cat }) => {
             const id = slug(cat.name);
             return (

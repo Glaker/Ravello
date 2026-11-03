@@ -9,10 +9,10 @@ import type { OrderStatus, Station } from '../lib/types';
 import s from './Cocina.module.css';
 
 type Filter = 'todo' | Station;
-const COLS: { status: OrderStatus; title: string; action: string }[] = [
-  { status: 'new', title: 'Nuevas', action: 'Tocar para empezar' },
-  { status: 'preparing', title: 'En preparación', action: 'Tocar cuando esté lista' },
-  { status: 'ready', title: 'Listas', action: 'Tocar al entregar' },
+const COLS: { status: OrderStatus; title: string; action: string; empty: string }[] = [
+  { status: 'new', title: 'Nuevas', action: 'Tocar para empezar', empty: 'Sin comandas nuevas' },
+  { status: 'preparing', title: 'En preparación', action: 'Tocar cuando esté lista', empty: 'Nada en preparación' },
+  { status: 'ready', title: 'Listas', action: 'Tocar al entregar', empty: 'Nada para entregar' },
 ];
 const FRESH_MS = 9000;
 const FILTER_KEY = 'ravello-kds-filter';
@@ -134,7 +134,7 @@ export default function Cocina() {
                 <span>{list.length}</span>
               </div>
               <div className={s.list}>
-                {list.length === 0 && <div className={s.empty}>{c.status === 'new' ? 'Sin comandas nuevas.' : '—'}</div>}
+                {list.length === 0 && <div className={s.empty}>{c.empty}</div>}
                 {list.map((x) => ticket(x, c.action))}
               </div>
             </section>
