@@ -9,9 +9,9 @@
 .sheet h1 { font-size: clamp(2.6rem, 9vw, 4.6rem); margin-top: 9mm; display: flex; flex-direction: column; align-items: center; }
 .filete { display: block; width: 46mm; height: 3px; background: var(--bordo); margin-top: 5mm; }
 .lead { margin: 6mm 0 0; font-size: clamp(1rem, 2.6vw, 1.3rem); color: var(--tinta); font-weight: 300; }
-.qr { width: 58%; margin-top: 9mm; }
+.qr { width: 66%; margin-top: 4mm; } /* incluye la zona silenciosa de 4 módulos */
 .qr svg { width: 100%; height: auto; display: block; }
-.url { margin: 6mm 0 0; font-weight: 700; letter-spacing: 0.04em; font-size: clamp(0.85rem, 2vw, 1.05rem); }
+.url { margin: 1mm 0 0; font-weight: 700; letter-spacing: 0.04em; font-size: clamp(0.85rem, 2vw, 1.05rem); }
 .foot { margin-top: auto; width: 100%; display: flex; justify-content: space-between; align-items: baseline; border-top: 1.5px solid var(--bordo); padding-top: 4mm; font-weight: 700; font-size: 0.95rem; }
 .lema { font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; font-size: 1.2rem; }
 
