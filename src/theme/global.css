@@ -1,0 +1,84 @@
+@font-face { font-family: 'Urbanist'; font-weight: 300; font-style: normal; font-display: swap; src: url('/fonts/Urbanist-Light.woff2') format('woff2'); }
+@font-face { font-family: 'Urbanist'; font-weight: 300; font-style: italic; font-display: swap; src: url('/fonts/Urbanist-LightItalic.woff2') format('woff2'); }
+@font-face { font-family: 'Urbanist'; font-weight: 400; font-style: normal; font-display: swap; src: url('/fonts/Urbanist-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Urbanist'; font-weight: 500; font-style: normal; font-display: swap; src: url('/fonts/Urbanist-Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Urbanist'; font-weight: 700; font-style: normal; font-display: swap; src: url('/fonts/Urbanist-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Urbanist'; font-weight: 900; font-style: normal; font-display: swap; src: url('/fonts/Urbanist-Black.woff2') format('woff2'); }
+
+:root {
+  --crema: #EDE5D5;
+  --crema-oscuro: #E4D9C4;
+  --papel: #F4EFE4;
+  --bordo: #602B2E;
+  --bordo-profundo: #3F1C1E;
+  --tinta: #3A2422;
+  --tinta-suave: #6A5450;
+  --terracota: #B5492F;
+  --verde: #3E5B3A;
+  --ambar: #B7791F;
+  --rojo: #A8321F;
+  --linea: rgba(58, 36, 34, 0.18);
+  --gutter: clamp(16px, 4vw, 56px);
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--crema);
+  color: var(--tinta);
+  font-family: 'Urbanist', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 300;
+  font-feature-settings: 'kern', 'liga';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--bordo); color: var(--crema); }
+a { color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ---------- recursos de la carta ---------- */
+
+/* Título de sección: Black en mayúsculas con filete fino debajo */
+.r-title {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+  color: var(--bordo);
+  margin: 0;
+}
+.r-filete { display: block; height: 2px; width: 4.5em; background: currentColor; margin-top: 0.45em; }
+
+/* Renglón de carta: nombre - - - - $ precio. La guía arranca donde termina
+   la última línea del nombre (aunque el nombre ocupe dos renglones). */
+.r-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; column-gap: 0.45em; }
+.r-row__name { overflow: hidden; }
+.r-row__name::after {
+  content: '';
+  display: inline-block;
+  width: 100vw;
+  margin-right: -100vw;
+  margin-left: 0.45em;
+  height: 1px;
+  vertical-align: 0.28em;
+  background: linear-gradient(to right, currentColor 0 55%, transparent 55% 100%) left / 0.62em 1px repeat-x;
+  opacity: 0.55;
+}
+.r-row__price { font-weight: 700; color: var(--bordo); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.r-kicker { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+.r-placeholder {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  background: repeating-linear-gradient(135deg, var(--crema-oscuro) 0 10px, var(--crema) 10px 20px);
+  color: var(--tinta-suave); font-size: 0.85rem; font-weight: 500; padding: 1rem;
+  border: 1px solid var(--linea);
+}
+
+:focus-visible { outline: 2px solid var(--bordo); outline-offset: 2px; }
+
+@keyframes r-flash { 0% { background: var(--bordo); color: var(--crema); } 100% { background: transparent; } }
+.r-flash { animation: r-flash 1.6s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
