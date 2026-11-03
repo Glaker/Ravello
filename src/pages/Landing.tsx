@@ -71,7 +71,6 @@ export default function Landing() {
             <span>la</span>
             <span>ciudad!</span>
           </h1>
-          <p className={s.heroLead}>Un jardín en calle 9. De día, café y plantas. De noche, se prenden los faroles.</p>
           <div className={s.heroActions}>
             <Link to="/carta" className={s.btn}>
               Ver la carta
