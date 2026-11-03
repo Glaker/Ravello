@@ -57,9 +57,9 @@ export default function Landing() {
           <a href="#noche">De noche</a>
           <a href="#horarios">Horarios</a>
         </nav>
-        <Link to="/carta" className={s.cta}>
-          Ver la carta
-        </Link>
+        <a href={site.maps} target="_blank" rel="noreferrer" className={s.cta}>
+          Cómo llegar
+        </a>
       </header>
 
       {/* ---------- HERO ---------- */}

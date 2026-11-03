@@ -28,14 +28,17 @@
 /* ---------- hero: exactamente un viewport, bloque de texto centrado ---------- */
 .hero {
   position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 20px;
-  height: 100svh; min-height: 620px; max-height: 1180px; padding-left: var(--gutter);
+  grid-template-rows: minmax(0, 1fr); /* la foto no puede estirar la fila más allá del viewport */
+  height: 100svh; height: 100dvh; min-height: 560px; max-height: 1200px; padding-left: var(--gutter);
+  --header-h: 116px; /* alto real del header absoluto */
 }
-.heroText { grid-column: 1 / 7; align-self: center; padding: 96px 0 40px; position: relative; z-index: 2; }
+/* se centra en el alto que queda debajo del header (padding-top = header, padding-bottom chico y simétrico al aire) */
+.heroText { grid-column: 1 / 7; grid-row: 1; align-self: center; padding: var(--header-h) 0 0; position: relative; z-index: 2; }
 .kicker { margin: 0 0 clamp(16px, 3vh, 28px); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tinta-suave); }
 .heroTitle {
   margin: 0; color: var(--bordo); font-weight: 900; text-transform: uppercase; line-height: 0.84; letter-spacing: -0.025em;
   /* escala con el ancho y con el alto, para que entre en 1366×768 sin quedar chico en 1920×1080 */
-  font-size: clamp(4rem, min(10.5vw, 17.5vh), 11rem); display: flex; flex-direction: column;
+  font-size: clamp(3.4rem, min(10.5vw, 16.5vh, 16.5dvh), 11rem); display: flex; flex-direction: column;
 }
 .heroTitle span:nth-child(2) { padding-left: 0.9em; font-size: 0.5em; line-height: 1.05; color: var(--terracota); }
 .heroLead { margin: clamp(18px, 3.4vh, 32px) 0 0; font-size: clamp(1.1rem, 1.5vw, 1.4rem); line-height: 1.4; max-width: 27ch; font-weight: 300; }
@@ -43,7 +46,8 @@
 .status { margin: 0; display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1rem; color: var(--tinta); }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--tinta-suave); flex: none; }
 .status[data-open='true'] .dot { background: var(--verde); box-shadow: 0 0 0 4px rgba(62, 91, 58, 0.18); }
-.heroMain { grid-column: 7 / 13; grid-row: 1; height: 100%; position: relative; }
+.heroMain { grid-column: 7 / 13; grid-row: 1; position: relative; min-height: 0; overflow: hidden; }
+.heroMain img { position: absolute; inset: 0; }
 
 /* ---------- café ---------- */
 .cafe { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 20px; padding: 160px var(--gutter) 120px 0; align-items: center; }
@@ -119,7 +123,7 @@
   .cta { margin-left: auto; padding: 10px 12px; font-size: 0.75rem; }
 
   .hero { display: flex; flex-direction: column; height: auto; min-height: 0; max-height: none; padding: 0; }
-  .heroMain { order: 2; height: 62svh; min-height: 380px; }
+  .heroMain { order: 2; height: 62svh; min-height: 380px; overflow: hidden; }
   .heroText { padding: 24px 16px 40px; }
   .heroTitle { font-size: clamp(3.6rem, 21vw, 6rem); }
 
