@@ -61,3 +61,15 @@ export const site = {
 /** Fecha de la carta impresa (metadato del PDF original). Se muestra como
  *  "Precios actualizados al" mientras no haya cambios registrados en price_changes. */
 export const CARTA_IMPRESA_FECHA = '2026-09-08T12:00:00-03:00';
+
+/** Horario por día (0 = domingo … 6 = sábado), en horas decimales hora Argentina.
+ *  close 24 = cierra a las 00. null = cerrado ese día. */
+export const horarioSemanal: ({ open: number; close: number } | null)[] = [
+  { open: 15, close: 20 }, // domingo
+  { open: 15, close: 20 }, // lunes
+  { open: 12, close: 20 }, // martes
+  { open: 12, close: 20 }, // miércoles
+  { open: 12, close: 20 }, // jueves
+  { open: 12, close: 24 }, // viernes
+  { open: 12, close: 24 }, // sábado
+];

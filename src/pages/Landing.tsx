@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '../brand/Logo';
 import { MenuRow } from '../components/MenuRow';
 import { Direccion } from '../components/Direccion';
 import { Photo, PhotoPlaceholder } from '../components/Photo';
 import { useMenu } from '../hooks/useMenu';
+import { estadoHoy } from '../lib/abierto';
 import { site } from '../theme/tokens';
 import s from './Landing.module.css';
 
@@ -20,8 +21,23 @@ const PASADOS = [
   { titulo: 'Viernes de pizzas de cáñamo', texto: '2x1 en vermú hasta las 21.', extra: null, fecha: '[FECHA]' },
 ];
 
+/** Placeholder de dato faltante: discreto, para completar. */
+function Todo({ children }: { children: string }) {
+  return <span className="r-todo">[{children}]</span>;
+}
+
+function useEstadoHoy() {
+  const [e, setE] = useState(() => estadoHoy());
+  useEffect(() => {
+    const t = setInterval(() => setE(estadoHoy()), 30000);
+    return () => clearInterval(t);
+  }, []);
+  return e;
+}
+
 export default function Landing() {
   const { categories, products } = useMenu();
+  const hoy = useEstadoHoy();
   useEffect(() => {
     document.title = 'Ravello Jardín · ¡Sacate la ciudad!';
   }, []);
@@ -34,7 +50,7 @@ export default function Landing() {
     <div className={s.page}>
       <header className={s.header}>
         <Link to="/" className={s.brand} aria-label="Ravello Jardín, inicio">
-          <Logo width={118} />
+          <Logo width={132} jardin={false} />
         </Link>
         <nav className={s.nav} aria-label="Secciones">
           <a href="#dia">De día</a>
@@ -55,23 +71,19 @@ export default function Landing() {
             <span>la</span>
             <span>ciudad!</span>
           </h1>
-          <p className={s.heroLead}>
-            Un jardín en calle 9. De día, café y plantas. De noche, se prenden los faroles.
-          </p>
+          <p className={s.heroLead}>Un jardín en calle 9. De día, café y plantas. De noche, se prenden los faroles.</p>
           <div className={s.heroActions}>
             <Link to="/carta" className={s.btn}>
               Ver la carta
             </Link>
-            <a href={site.maps} target="_blank" rel="noreferrer" className={s.link}>
-              <Direccion />
-            </a>
+            <p className={s.status} data-open={hoy.abierto}>
+              <span className={s.dot} aria-hidden />
+              {hoy.texto}
+            </p>
           </div>
         </div>
         <div className={s.heroMain}>
-          <Photo name="jardin-noche" alt="El jardín de Ravello de noche, con plantas iluminadas" sizes="(max-width: 760px) 100vw, 55vw" position="50% 40%" priority />
-        </div>
-        <div className={s.heroInset}>
-          <Photo name="sendero-noche" alt="Sendero entre plantas y faroles" sizes="(max-width: 760px) 45vw, 22vw" position="40% 60%" priority />
+          <Photo name="jardin-noche" alt="El jardín de Ravello de noche, con plantas iluminadas" sizes="(max-width: 760px) 100vw, 50vw" position="50% 40%" priority />
         </div>
       </section>
 
@@ -104,7 +116,9 @@ export default function Landing() {
             <span className="r-filete" />
           </h2>
           <p>Las plantas del jardín no son de adorno nomás: te las podés llevar.</p>
-          <p className={s.placeholder}>[ASÍ: qué plantas tienen, si asesoran o hacen envíos]</p>
+          <p>
+            <Todo>ASÍ: qué plantas tienen, si asesoran o hacen envíos</Todo>
+          </p>
         </div>
         <figure className={s.viveroPhoto}>
           <Photo name="ficus" alt="Un ficus lyrata en maceta, apoyado sobre la corteza del jardín" sizes="(max-width: 760px) 80vw, 30vw" position="60% 40%" />
@@ -159,8 +173,9 @@ export default function Landing() {
               <h3>{PROXIMO.titulo}</h3>
               <p>{PROXIMO.texto}</p>
               <a href={site.instagram} target="_blank" rel="noreferrer" className={s.linkLight}>
-                Anotate por Instagram [ASÍ: cupo y precio]
-              </a>
+                Anotate por Instagram
+              </a>{' '}
+              <Todo>ASÍ: cupo y precio</Todo>
             </div>
           </article>
 
@@ -168,7 +183,7 @@ export default function Landing() {
           <ul className={s.past}>
             {PASADOS.map((e) => (
               <li key={e.titulo}>
-                <span className={s.pastDate}>{e.fecha}</span>
+                <span className={s.pastDate}>{e.fecha.startsWith('[') ? <Todo>{e.fecha.slice(1, -1)}</Todo> : e.fecha}</span>
                 <div>
                   <b>{e.titulo}</b>
                   <span>
